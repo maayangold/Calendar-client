@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset='utf-8' />
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+      axios.get("https://localhost:7214/api/Events").then((res) => {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          events: res.data,
+        });
+        calendar.render();
+      });
+    });
+  </script>
+</head>
+<style>
+  #ok {
+    color: blue;
+  }
+</style>
+
+<body>
+  <button onclick="addEvent()">הוספת אירוע</button>
+
+  <input id="date" type="date" value="2023-11-13">
+  <input id="title" type="text" placeholder="הכנס  אירוע">
+  <hr />
+  <button onclick="updateEvent()">עידכון אירוע</button>
+  <hr />
+  <div>
+    <button onclick=deleteEvent()>מחיקת אירוע</button>
+    <hr />
+  </div>
+  <div id="eventList"></div>
+  <div id="ok"></div>
+  <div id='calendar'></div>
+
+  <script>
+
+    function addEvent() {
+      //for not a localhost server: https://eventsapi.onrender.com/api/Events
+      axios.post("https://localhost:7214/api/Events", {
+        "title": document.getElementById("title").value,
+        "start": document.getElementById("date").value
+      })
+      location.reload();
+    }
+
+    function deleteEvent() {
+      //if those lists are not empty
+
+      document.getElementById("eventList").innerHTML = "";
+      document.getElementById("ok").innerHTML = "";
+      axios.get("https://localhost:7214/api/Events").then(res => {
+        for (r of res.data) {
+          document.getElementById("eventList").innerHTML += `<p>id=${r.id} title:${r.title}</p ><br/>`
+        }
+        document.getElementById("ok").innerHTML += `<input id="input" placeholder="הקש מספר תאריך למחיקה"/>`
+        document.getElementById("ok").innerHTML += `<button id="ok" onclick=deleteE(document.getElementById("input").value)>Ok</button>`
+        document.getElementById("ok").innerHTML += `<button id="ok" onclick=cancle()>Cancle</button>`
+      });
+    }
+    function deleteE(id) {
+      axios.delete(`https://localhost:7214/api/Events/${id}/`);
+      document.getElementById("eventList").innerHTML = "";
+      document.getElementById("ok").innerHTML = "";
+      location.reload();
+    }
+    function cancle() {
+      document.getElementById("eventList").innerHTML = "";
+      document.getElementById("ok").innerHTML = "";
+      document.getElementById("title").placeholder = "הכנס ארוע";
+        document.getElementById("date").value = "2023-11-13";
+
+    }
+    function updateEvent() {
+      //if those lists are not empty
+
+      document.getElementById("eventList").innerHTML = "";
+      document.getElementById("ok").innerHTML = "";
+      axios.get("https://localhost:7214/api/Events").then(res => {
+        for (r of res.data) {
+          document.getElementById("eventList").innerHTML += `<p>id=${r.id} title:${r.title}</p ><br/>`
+        }
+        document.getElementById("title").placeholder = "עדכן ארוע";
+        document.getElementById("date").value = "2023-11-13";
+        document.getElementById("ok").innerHTML += `<input id="input" placeholder="הקש מספר תאריך לעידכון"/>`
+        document.getElementById("ok").innerHTML += `<button id="ok" onclick=update(document.getElementById("input").value)>Ok</button>`
+        document.getElementById("ok").innerHTML += `<button id="ok" onclick=cancle()>Cancle</button>`
+      document.getElementById("ok").innerHTML += `<p> עדכן נתונים לאירוע שנבחר<p/>`
+  }); 
+ }
+    function update(id) {
+    
+      axios.put(`https://localhost:7214/api/Events/${id}`, {
+        "title": document.getElementById("title").value,
+        "start": document.getElementById("date").value
+      });
+       document.getElementById("title").placeholder = "הכנס  אירוע";
+      document.getElementById("eventList").innerHTML = "";
+      document.getElementById("ok").innerHTML = "";
+      location.reload();
+     
+  
+
+    }
+    function fixedEvent(id) {
+
+     
+
+    }
+  </script>
+</body>
+
+</html>
